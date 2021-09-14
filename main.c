@@ -45,11 +45,6 @@ void main(void) {
     		    }
     		}
     	}
-
-
-
-    	//hui mocha pizda jopa
-
     }
 }
 
