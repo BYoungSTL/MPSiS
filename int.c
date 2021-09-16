@@ -14,29 +14,36 @@ __interrupt void S1_interrupt_handler(void)
 	    	}
 	    }
 	}
+	P1IFG &= ~BIT7;
+	P2IFG &= ~BIT2;
 }
 
 void main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    P1OUT &= ~BIT2;
-    P1OUT &= ~BIT3;
+    __bis_SR_register(GIE);
 
+    //BUTTON 1
     P1DIR &= ~BIT7;
     P1REN |= BIT7;
     P1SEL = 0;
 
-    P2REN |= BIT2;
+    //BUTTON 2
     P2DIR &= ~BIT2;
+    P2REN |= BIT2;
     P2SEL = 0;
 
+    //LED 1
     P1DIR |= BIT2;
     P1REN |= BIT2;
+    P1OUT &= ~BIT2;
 
-
+    //LED 2
     P1DIR |= BIT3;
     P1REN |= BIT3;
+    P1OUT &= ~BIT3;
 
+    //INTERRUPT
     P1IES &= ~BIT7;
     P2IES &= ~BIT2;
     P1IFG &= ~BIT7;
@@ -44,7 +51,7 @@ void main(void) {
     P1IE |= BIT7;
     P2IE |= BIT2;
 
-    __bis_SR_register(GIE);
+
     while(1){
     	__no_operation();
     }
