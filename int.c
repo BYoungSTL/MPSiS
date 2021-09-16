@@ -19,6 +19,9 @@ __interrupt void S1_interrupt_handler(void)
 void main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
+    P1OUT &= ~BIT2;
+    P1OUT &= ~BIT3;
+
     P1DIR &= ~BIT7;
     P1REN |= BIT7;
     P1SEL = 0;
