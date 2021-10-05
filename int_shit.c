@@ -5,8 +5,17 @@
 #pragma vector = PORT2_VECTOR
 __interrupt void S2_interrupt_handler(void)
 {
+	//V1.0 works
+//	if((P1IN & BIT7) == 1){
+//	    	if((P1OUT & BIT3) == 0){
+//	    		P1OUT |= BIT3;
+//	    	}else{
+//	    		P1OUT &= ~BIT3;
+//	    	}
+//	}
 
-	if((P1IES & BIT7) == 1){
+	//V2.0 works
+	if((P1IES & BIT7) != 0){
 	    	if((P1OUT & BIT3) == 0){
 	    		P1OUT |= BIT3;
 	    	}else{
@@ -14,29 +23,6 @@ __interrupt void S2_interrupt_handler(void)
 	    	}
 	}
 
-//	if((P1IFG & BIT7) == 0){
-//		    	if((P1OUT & BIT3) == 0){
-//		    		P1OUT |= BIT3;
-//		    		P1IFG &= ~BIT7;
-//		    		P2IFG &= ~BIT2;
-//		    	}else{
-//		    		P1OUT &= ~BIT3;
-//		    		P1IFG &= ~BIT7;
-//		    		P2IFG &= ~BIT2;
-//		    	}
-//		}
-
-	//P1OUT |= BIT3;
-
-	//button 2
-	/*if((P1OUT & BIT2) == 0){
-	    			P1OUT |= BIT2;
-	    		}else{
-	    			if((P2IN & BIT2) == 1){
-	    				P1OUT &= ~BIT2;
-	    			}
-	    		}
-	 */
 	P1IFG &= ~BIT7;
 	P2IFG &= ~BIT2;
 }
@@ -50,7 +36,7 @@ __interrupt void S1_interrupt_handler(void){
 //		//P1IES
 //	}
 
-	if((P1IES & BIT7) == 1)
+	if((P1IES & BIT7) != 0)
 	{
 		P1IES &= ~BIT7;
 		P1IFG &= ~BIT7;
