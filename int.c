@@ -9,8 +9,10 @@ __interrupt void S2_interrupt_handler(void)
 	if((P1IN & BIT7) != 0){
 	    	if((P1OUT & BIT3) == 0){
 	    		P1OUT |= BIT3;
+			P2IFG &= ~BIT2;
 	    	}else{
 	    		P1OUT &= ~BIT3;
+			P2IFG &= ~BIT2;
 	    	}
 	}
 
