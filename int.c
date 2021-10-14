@@ -7,6 +7,7 @@ __interrupt void S2_interrupt_handler(void)
 {
 	//V1.0 works
 	if((P1IN & BIT7) != 0){
+		if((P1IN & BIT7) != 0){
 	    	if((P1OUT & BIT3) == 0){
 	    		P1OUT |= BIT3;
 			P2IFG &= ~BIT2;
@@ -14,16 +15,8 @@ __interrupt void S2_interrupt_handler(void)
 	    		P1OUT &= ~BIT3;
 			P2IFG &= ~BIT2;
 	    	}
+		}
 	}
-
-	//V2.0 works
-//	if((P1IES & BIT7) != 0){
-//	    	if((P1OUT & BIT3) == 0){
-//	    		P1OUT |= BIT3;
-//	    	}else{
-//	    		P1OUT &= ~BIT3;
-//	    	}
-//	}
 
 	P1IFG &= ~BIT7;
 	P2IFG &= ~BIT2;
@@ -43,19 +36,6 @@ __interrupt void S1_interrupt_handler(void){
 		}
 	}
 
-	//For V2.0
-//	if((P1IES & BIT7) != 0)
-//	{
-//		P1IES &= ~BIT7;
-//		P1IFG &= ~BIT7;
-//	}else{
-//		if((P1IES & BIT7) == 0)
-//		{
-//			P1IES |= BIT7;
-//			P1IFG &= ~BIT7;
-//		}
-//	}
-
 	P1IFG &= ~BIT7;
 }
 
@@ -66,11 +46,13 @@ void main(void) {
 
     //BUTTON 1
     P1DIR &= ~BIT7;
+    P1OUT |= BIT7;
     P1REN |= BIT7;
     P1SEL = 0;
 
     //BUTTON 2
     P2DIR &= ~BIT2;
+    P2OUT |= BIT2;
     P2REN |= BIT2;
     P2SEL = 0;
 
@@ -94,6 +76,6 @@ void main(void) {
 
 
     while(1){
-    	__no_operation();
+//    	__no_operation();
     }
 }
