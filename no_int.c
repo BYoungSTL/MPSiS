@@ -61,13 +61,16 @@ void main(void) {
     		if((P1OUT & BIT2) == 0){
     			P1OUT |= BIT2;
     			butt1_flag = 0;
-    		}else{
-    			if(butt2 == 1){
-    				P1OUT &= ~BIT2;
-    				butt1_flag = 0;
-    			}
     		}
+
     		butt1_flag = 0;
+    	}
+
+    	if(butt2_flag == 1){
+    	    if(butt1 == 1){
+    	    	P1OUT &= ~BIT2;
+    	    	//butt1_flag = 0;
+    	    }
     	}
     	//end of second LED
     }
