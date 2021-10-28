@@ -1,87 +1,90 @@
 #include <msp430.h>
-#include "stdio.h"
 
 /*
- * main.c
- */
-#pragma vector = PORT2_VECTOR
-__interrupt void S2_interrupt_handler(void)
-{
-	__delay_cycles(250000);
-	//V1.0 works
-	if((P1IN & BIT7) != 0){
-		if((P1IN & BIT7) != 0){
-	    	if((P1OUT & BIT3) == 0){
-	    		P1OUT |= BIT3;
-			P2IFG &= ~BIT2;
-	    	}else{
-	    		P1OUT &= ~BIT3;
-			P2IFG &= ~BIT2;
-	    	}
-		}
-	}
+* Task:
+*  DCOCLK frequency : 558000Hz // 720 kHz       // 720 000 / 32 768 = 21,972  // 32 768/1 * (10 + 1) * 2 = 720 896
+*  MCLK frequency : 3467Hz (default frequency / 16) DF/32 = 22 500 Hz
+*  Alternative MCLK source: DCOCLKDIV / XT1CLK
+*  Alternative MCLK divider: 4 / 2
+*  Low Power Mode (LPM): 1 / 1
+*/
 
-	P1IFG &= ~BIT7;
-	P2IFG &= ~BIT2;
-	__delay_cycles(250000);
-}
+volatile int short ALTERNATIVE_FREQUENCY_ON = 0;
+volatile int short LPM_MODE_1_ON = 0;
 
 #pragma vector = PORT1_VECTOR
-__interrupt void S1_interrupt_handler(void){
-	__delay_cycles(250000);
-	if((P1OUT & BIT2) == 0){
-		P1OUT |= BIT2;
-		P1IFG &= ~BIT7;
-		P1IES |= BIT7;
-	}else{
-		if((P2IN & BIT2) == 0){
-			P1OUT &= ~BIT2;
-			P1IFG &= ~BIT7;
-			P1IES &= ~BIT7;
-		}
-	}
+__interrupt void PORT1_S1(void)
+{
+    __delay_cycles(1000);
 
-	P1IFG &= ~BIT7;
-	__delay_cycles(250000);
+    if (LPM_MODE_1_ON)
+    {
+        _bic_SR_register_on_exit(LPM1_bits);
+        LPM_MODE_1_ON = 0;
+    }
+    else
+    {
+        LPM_MODE_1_ON = 1;
+        _bis_SR_register_on_exit(LPM1_bits);
+    }
+
+    P1IFG &= ~BIT7;
 }
 
-void main(void) {
- 	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+#pragma vector = PORT2_VECTOR
+__interrupt void PORT2_S2(void)
+{
+    __delay_cycles(1000);
 
-    __bis_SR_register(GIE);
+    if (ALTERNATIVE_FREQUENCY_ON)
+    {
+        UCSCTL4 = SELM__DCOCLK;
+        UCSCTL5 = DIVM__32;  // divide 32
+        ALTERNATIVE_FREQUENCY_ON = 0;
+    }
+    else
+    {
+        UCSCTL4 = SELM__XT1CLK;
+        UCSCTL5 = DIVM__2; // divide 2
+        ALTERNATIVE_FREQUENCY_ON = 1;
+    }
 
-    //BUTTON 1
+    P2IFG &= ~BIT2;
+}
+
+int main(void)
+{
+    WDTCTL = WDTPW | WDTHOLD;
+
     P1DIR &= ~BIT7;
     P1OUT |= BIT7;
     P1REN |= BIT7;
-    P1SEL = 0;
 
-    //BUTTON 2
     P2DIR &= ~BIT2;
     P2OUT |= BIT2;
     P2REN |= BIT2;
-    P2SEL = 0;
 
-    //LED 1
-    P1DIR |= BIT2;
-    P1REN |= BIT2;
-    P1OUT &= ~BIT2;
+    __bis_SR_register(GIE); //Enabling CPU interrupts
 
-    //LED 2
-    P1DIR |= BIT3;
-    P1REN |= BIT3;
-    P1OUT &= ~BIT3;
-
-    //INTERRUPT
-    P1IES &= ~BIT7;
-    P2IES &= ~BIT2;
+    P1IES |= BIT7;
     P1IFG &= ~BIT7;
-    P2IFG &= ~BIT2;
     P1IE |= BIT7;
+
+    P2IES |= BIT2;
+    P2IFG &= ~BIT7;
     P2IE |= BIT2;
 
+    P7DIR |= BIT7;
+    P7SEL |= BIT7;
 
-    while(1){
-//    	__no_operation();
-    }
+    // 32 768 / 1 * (10 + 1) * 2 = 720 896
+    //DCOCLK = FLLREFCLK / FLLREFDIV * (FLLN + 1) * FLLD
+
+    UCSCTL1 |= DCORSEL_0;
+    UCSCTL2 |= (FLLD__2 | FLLN4);
+    UCSCTL3 |= (SELREF__XT1CLK | FLLREFDIV__1);
+    UCSCTL4 |= SELM__DCOCLK;
+    UCSCTL5 |= DIVM__32;
+
+    return 0;
 }
