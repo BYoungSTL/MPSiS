@@ -1,10 +1,13 @@
 #include <msp430.h>
+#include "stdio.h"
+
 /*
  * main.c
  */
 #pragma vector = PORT2_VECTOR
 __interrupt void S2_interrupt_handler(void)
 {
+	__delay_cycles(250000);
 	//V1.0 works
 	if((P1IN & BIT7) != 0){
 		if((P1IN & BIT7) != 0){
@@ -20,10 +23,12 @@ __interrupt void S2_interrupt_handler(void)
 
 	P1IFG &= ~BIT7;
 	P2IFG &= ~BIT2;
+	__delay_cycles(250000);
 }
 
 #pragma vector = PORT1_VECTOR
 __interrupt void S1_interrupt_handler(void){
+	__delay_cycles(250000);
 	if((P1OUT & BIT2) == 0){
 		P1OUT |= BIT2;
 		P1IFG &= ~BIT7;
@@ -37,6 +42,7 @@ __interrupt void S1_interrupt_handler(void){
 	}
 
 	P1IFG &= ~BIT7;
+	__delay_cycles(250000);
 }
 
 void main(void) {
