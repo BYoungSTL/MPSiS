@@ -7,28 +7,22 @@
 #pragma vector = PORT2_VECTOR
 __interrupt void S2_interrupt_handler(void)
 {
-	__delay_cycles(250000);
-	//V1.0 works
-	if((P1IN & BIT7) != 0){
-		if((P1IN & BIT7) != 0){
-	    	if((P1OUT & BIT3) == 0){
-	    		P1OUT |= BIT3;
-			P2IFG &= ~BIT2;
-	    	}else{
-	    		P1OUT &= ~BIT3;
-			P2IFG &= ~BIT2;
-	    	}
-		}
-	}
 
-	P1IFG &= ~BIT7;
+	//V1.0 works
+	__delay_cycles(180000);
+		if((P1IN & BIT7) != 0){
+	    		P1OUT ^= BIT3;
+
+		}
+
+
 	P2IFG &= ~BIT2;
-	__delay_cycles(250000);
+
 }
 
 #pragma vector = PORT1_VECTOR
 __interrupt void S1_interrupt_handler(void){
-	__delay_cycles(250000);
+	__delay_cycles(180000);
 	if((P1OUT & BIT2) == 0){
 		P1OUT |= BIT2;
 		P1IFG &= ~BIT7;
@@ -42,46 +36,42 @@ __interrupt void S1_interrupt_handler(void){
 	}
 
 	P1IFG &= ~BIT7;
-	__delay_cycles(250000);
+	__delay_cycles(180000);
 }
 
 void main(void) {
  	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 
-    __bis_SR_register(GIE);
+
 
     //BUTTON 1
     P1DIR &= ~BIT7;
-    P1OUT |= BIT7;
     P1REN |= BIT7;
     P1SEL = 0;
 
     //BUTTON 2
     P2DIR &= ~BIT2;
-    P2OUT |= BIT2;
     P2REN |= BIT2;
     P2SEL = 0;
 
     //LED 1
     P1DIR |= BIT2;
-    P1REN |= BIT2;
     P1OUT &= ~BIT2;
 
     //LED 2
     P1DIR |= BIT3;
-    P1REN |= BIT3;
     P1OUT &= ~BIT3;
 
     //INTERRUPT
+    __bis_SR_register(GIE);
+
+    P1IE |= BIT7;
+    P2IE |= BIT2;
     P1IES &= ~BIT7;
     P2IES &= ~BIT2;
     P1IFG &= ~BIT7;
     P2IFG &= ~BIT2;
-    P1IE |= BIT7;
-    P2IE |= BIT2;
 
+    __no_operation();
 
-    while(1){
-//    	__no_operation();
-    }
 }
